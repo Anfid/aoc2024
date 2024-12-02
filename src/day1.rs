@@ -63,8 +63,8 @@ pub fn part2_safe(input: &str) -> Result<i64> {
 
 pub fn parse(input: &str) -> Result<(Vec<i64>, Vec<i64>)> {
     let bytes = input.as_bytes();
-    let mut left = Vec::new();
-    let mut right = Vec::new();
+    let mut left = Vec::with_capacity(1000);
+    let mut right = Vec::with_capacity(1000);
     for line in bytes.split_inclusive(|&c| c == b'\n') {
         let line = line.trim_ascii_start();
         let space = line
@@ -72,8 +72,8 @@ pub fn parse(input: &str) -> Result<(Vec<i64>, Vec<i64>)> {
             .position(|&c| c == b' ')
             .ok_or_else(|| anyhow!("not enough location ids"))?;
         let (l, r) = line.split_at(space);
-        let l = i64_from_ascii(l.trim_ascii_end());
-        let r = i64_from_ascii(r.trim_ascii());
+        let l = i64_from_ascii(l);
+        let r = i64_from_ascii(r);
         left.push(l);
         right.push(r);
     }
@@ -83,6 +83,7 @@ pub fn parse(input: &str) -> Result<(Vec<i64>, Vec<i64>)> {
 fn i64_from_ascii(bytes: &[u8]) -> i64 {
     bytes
         .into_iter()
+        .filter(|&&byte| matches!(byte, b'0'..=b'9'))
         .fold(0i64, |acc, &d| acc * 10 + (d - b'0') as i64)
 }
 
@@ -91,21 +92,23 @@ mod tests {
     use super::*;
 
     const DAY1_INPUT: &'static str = "\
-        3   4
-        4   3
-        2   5
-        1   3
-        3   9
-        3   3
+3   4
+4   3
+2   5
+1   3
+3   9
+3   3
 ";
 
     #[test]
     fn test_part1() {
         assert_eq!(part1(DAY1_INPUT), 11);
+        assert_eq!(part1_safe(DAY1_INPUT).unwrap(), 11);
     }
 
     #[test]
     fn test_part2() {
         assert_eq!(part2(DAY1_INPUT), 31);
+        assert_eq!(part2_safe(DAY1_INPUT).unwrap(), 31);
     }
 }
