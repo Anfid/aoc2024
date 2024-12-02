@@ -2,12 +2,13 @@ use anyhow::{anyhow, Result};
 use clap::Parser;
 use std::io::{BufRead, Read};
 
-fn dispatch(day: u8, part: u8, input: &str) -> Result<i64> {
+fn dispatch(day: u8, part: u8, input: &str) -> Result<String> {
     match (day, part) {
         (1, 1) => aoc2024::day1::part1_safe(input),
         (1, 2) => aoc2024::day1::part2_safe(input),
         _ => Err(anyhow!("no solution for day {day} part {part}")),
     }
+    .map(|res| res.to_string())
 }
 
 fn run() -> Result<()> {
@@ -82,7 +83,7 @@ fn run() -> Result<()> {
     let iterations = cli.iterations.unwrap_or(1);
 
     let start = cli.time.then(|| std::time::Instant::now());
-    let mut result = 0;
+    let mut result = String::new();
     for _ in 0..iterations {
         result = dispatch(day, part, &input)?;
     }
