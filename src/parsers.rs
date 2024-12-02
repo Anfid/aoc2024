@@ -14,6 +14,7 @@ pub trait BytesAsciiExt {
 impl BytesAsciiExt for &[u8] {
     fn ascii_lines(&self) -> impl Iterator<Item = &[u8]> {
         self.split_inclusive(|&c| c == b'\n')
+            .map(|l| l.trim_ascii_end())
     }
 
     fn ascii_words(&self) -> impl Iterator<Item = &[u8]> {
