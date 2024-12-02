@@ -10,9 +10,9 @@ pub fn part1(input: &str) -> usize {
 }
 
 fn parse_input_digit(num: &[u8]) -> i32 {
-    (match num {
-        &[tens, ones] => (tens - b'0') * 10 + ones - b'0',
-        &[ones] => ones - b'0',
+    (match *num {
+        [tens, ones] => (tens - b'0') * 10 + ones - b'0',
+        [ones] => ones - b'0',
         _ => unsafe { std::hint::unreachable_unchecked() },
     }) as i32
 }
@@ -118,15 +118,13 @@ fn verify_report_dampened(&report: &&[u8]) -> bool {
         } else {
             ReportStatusDampened::Ascending(false, head[0], head[0])
         }
+    } else if !matches!(head[0] - head[1], 1..=3) && matches!(head[1] - head[2], 1..=3) {
+        ReportStatusDampened::Descending(true, head[1] + 1, head[1] + 1)
     } else {
-        if !matches!(head[0] - head[1], 1..=3) && matches!(head[1] - head[2], 1..=3) {
-            ReportStatusDampened::Descending(true, head[1] + 1, head[1] + 1)
-        } else {
-            ReportStatusDampened::Descending(false, head[0], head[0])
-        }
+        ReportStatusDampened::Descending(false, head[0], head[0])
     };
     head[1..]
-        .into_iter()
+        .iter()
         .copied()
         .chain(report)
         .try_fold(status, analyze_next_lvl_dampened)

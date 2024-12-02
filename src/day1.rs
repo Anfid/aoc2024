@@ -19,7 +19,7 @@ pub fn part1_safe(input: &str) -> Result<u64> {
     left.sort_unstable();
     right.sort_unstable();
     let result = std::iter::zip(left, right)
-        .map(|(l, r)| l.abs_diff(r) as u64)
+        .map(|(l, r)| l.abs_diff(r))
         .sum();
     Ok(result)
 }

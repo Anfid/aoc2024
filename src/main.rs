@@ -83,7 +83,7 @@ fn run() -> Result<()> {
 
     let iterations = cli.iterations.unwrap_or(1);
 
-    let start = cli.time.then(|| std::time::Instant::now());
+    let start = cli.time.then(std::time::Instant::now);
     let mut result = String::new();
     for _ in 0..iterations {
         result = dispatch(day, part, &input)?;
