@@ -1,8 +1,20 @@
 use anyhow::{anyhow, Result};
+use aoc_runner_derive::aoc;
 use std::cmp::Ordering;
 
-pub fn part1(input: &str) -> Result<i64> {
-    let (mut left, mut right) = parse(input.as_bytes())?;
+#[aoc(day1, part1, AoCS)]
+pub fn part1(input: &str) -> i64 {
+    part1_safe(input).unwrap()
+}
+
+#[aoc(day1, part2, AoCS)]
+pub fn part2(input: &str) -> i64 {
+    part2_safe(input).unwrap()
+}
+
+#[aoc(day1, part1, default)]
+pub fn part1_safe(input: &str) -> Result<i64> {
+    let (mut left, mut right) = parse(input)?;
     left.sort_unstable();
     right.sort_unstable();
     let result = std::iter::zip(left, right)
@@ -11,8 +23,9 @@ pub fn part1(input: &str) -> Result<i64> {
     Ok(result)
 }
 
-pub fn part2(input: &str) -> Result<i64> {
-    let (mut left, mut right) = parse(input.as_bytes())?;
+#[aoc(day1, part2, default)]
+pub fn part2_safe(input: &str) -> Result<i64> {
+    let (mut left, mut right) = parse(input)?;
     left.sort_unstable();
     right.sort_unstable();
 
@@ -48,7 +61,8 @@ pub fn part2(input: &str) -> Result<i64> {
     Ok(similarity_score)
 }
 
-fn parse(bytes: &[u8]) -> Result<(Vec<i64>, Vec<i64>)> {
+pub fn parse(input: &str) -> Result<(Vec<i64>, Vec<i64>)> {
+    let bytes = input.as_bytes();
     let mut left = Vec::new();
     let mut right = Vec::new();
     for line in bytes.split_inclusive(|&c| c == b'\n') {
@@ -87,11 +101,11 @@ mod tests {
 
     #[test]
     fn test_part1() {
-        assert_eq!(part1(DAY1_INPUT).unwrap(), 11);
+        assert_eq!(part1(DAY1_INPUT), 11);
     }
 
     #[test]
     fn test_part2() {
-        assert_eq!(part2(DAY1_INPUT).unwrap(), 31);
+        assert_eq!(part2(DAY1_INPUT), 31);
     }
 }

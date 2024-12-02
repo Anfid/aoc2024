@@ -4,8 +4,8 @@ use std::io::{BufRead, Read};
 
 fn dispatch(day: u8, part: u8, input: &str) -> Result<i64> {
     match (day, part) {
-        (1, 1) => aoc2024::day1::part1(input),
-        (1, 2) => aoc2024::day1::part2(input),
+        (1, 1) => aoc2024::day1::part1_safe(input),
+        (1, 2) => aoc2024::day1::part2_safe(input),
         _ => Err(anyhow!("no solution for day {day} part {part}")),
     }
 }

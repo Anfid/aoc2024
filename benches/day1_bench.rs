@@ -3,7 +3,7 @@ use std::hint::black_box;
 
 use aoc2024::day1;
 
-const INPUT_REAL: &'static str = include_str!("../assets/day1.txt");
+const INPUT_REAL: &'static str = include_str!("../input/2024/day1.txt");
 
 fn criterion_benchmark(c: &mut Criterion) {
     c.bench_function("day1_part1", |b| {
