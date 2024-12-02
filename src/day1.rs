@@ -1,30 +1,31 @@
+use crate::parsers::u64_from_ascii;
 use anyhow::{anyhow, Result};
 use aoc_runner_derive::aoc;
 use std::cmp::Ordering;
 
 #[aoc(day1, part1, AoCS)]
-pub fn part1(input: &str) -> i64 {
+pub fn part1(input: &str) -> u64 {
     part1_safe(input).unwrap()
 }
 
 #[aoc(day1, part2, AoCS)]
-pub fn part2(input: &str) -> i64 {
+pub fn part2(input: &str) -> u64 {
     part2_safe(input).unwrap()
 }
 
 #[aoc(day1, part1, default)]
-pub fn part1_safe(input: &str) -> Result<i64> {
+pub fn part1_safe(input: &str) -> Result<u64> {
     let (mut left, mut right) = parse(input)?;
     left.sort_unstable();
     right.sort_unstable();
     let result = std::iter::zip(left, right)
-        .map(|(l, r)| l.abs_diff(r) as i64)
+        .map(|(l, r)| l.abs_diff(r) as u64)
         .sum();
     Ok(result)
 }
 
 #[aoc(day1, part2, default)]
-pub fn part2_safe(input: &str) -> Result<i64> {
+pub fn part2_safe(input: &str) -> Result<u64> {
     let (mut left, mut right) = parse(input)?;
     left.sort_unstable();
     right.sort_unstable();
@@ -61,7 +62,7 @@ pub fn part2_safe(input: &str) -> Result<i64> {
     Ok(similarity_score)
 }
 
-pub fn parse(input: &str) -> Result<(Vec<i64>, Vec<i64>)> {
+pub fn parse(input: &str) -> Result<(Vec<u64>, Vec<u64>)> {
     let bytes = input.as_bytes();
     let mut left = Vec::with_capacity(1000);
     let mut right = Vec::with_capacity(1000);
@@ -72,19 +73,12 @@ pub fn parse(input: &str) -> Result<(Vec<i64>, Vec<i64>)> {
             .position(|&c| c == b' ')
             .ok_or_else(|| anyhow!("not enough location ids"))?;
         let (l, r) = line.split_at(space);
-        let l = i64_from_ascii(l);
-        let r = i64_from_ascii(r);
+        let l = u64_from_ascii(l);
+        let r = u64_from_ascii(r);
         left.push(l);
         right.push(r);
     }
     Ok((left, right))
-}
-
-fn i64_from_ascii(bytes: &[u8]) -> i64 {
-    bytes
-        .into_iter()
-        .filter(|&&byte| matches!(byte, b'0'..=b'9'))
-        .fold(0i64, |acc, &d| acc * 10 + (d - b'0') as i64)
 }
 
 #[cfg(test)]

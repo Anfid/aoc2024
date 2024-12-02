@@ -1,9 +1,11 @@
+use crate::parsers::u64_from_ascii;
+use crate::parsers::BytesAsciiExt;
 use anyhow::Result;
 use aoc_runner_derive::aoc;
 
 #[aoc(day2, part1, AoCS)]
 pub fn part1(input: &str) -> usize {
-    part1_naive(input).unwrap()
+    part1_safe(input).unwrap()
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -14,40 +16,44 @@ enum ReportStatus {
     Ascending(i64),
 }
 
-#[aoc(day2, part1, naive)]
-pub fn part1_naive(input: &str) -> Result<usize> {
-    let reports = parse(input)?;
-    let result = reports
-        .into_iter()
-        .filter(|report| {
-            report
-                .into_iter()
-                .try_fold(ReportStatus::Uninitialized, |acc, &lvl| match acc {
-                    ReportStatus::Uninitialized => Ok(ReportStatus::Unknown(lvl)),
-                    ReportStatus::Unknown(prev) => match prev - lvl {
-                        -3..=-1 => Ok(ReportStatus::Ascending(lvl)),
-                        1..=3 => Ok(ReportStatus::Descending(lvl)),
-                        _ => Err(()),
-                    },
-                    ReportStatus::Descending(prev) => {
-                        if let 1..=3 = prev - lvl {
-                            Ok(ReportStatus::Descending(lvl))
-                        } else {
-                            Err(())
-                        }
-                    }
-                    ReportStatus::Ascending(prev) => {
-                        if let 1..=3 = lvl - prev {
-                            Ok(ReportStatus::Ascending(lvl))
-                        } else {
-                            Err(())
-                        }
-                    }
-                })
-                .is_ok()
-        })
-        .count();
+#[aoc(day2, part1, safe)]
+pub fn part1_safe(input: &str) -> Result<usize> {
+    let bytes = input.as_bytes();
+    let result = bytes.ascii_lines().filter(verify_report).count();
     Ok(result)
+}
+
+fn verify_report(report: &&[u8]) -> bool {
+    report
+        .ascii_words()
+        .map(|level| u64_from_ascii(level) as i64)
+        .try_fold(ReportStatus::Uninitialized, analyze_next_lvl)
+        .is_ok()
+}
+
+fn analyze_next_lvl(acc: ReportStatus, lvl: i64) -> Result<ReportStatus, ()> {
+    match acc {
+        ReportStatus::Uninitialized => Ok(ReportStatus::Unknown(lvl)),
+        ReportStatus::Unknown(prev) => match prev - lvl {
+            -3..=-1 => Ok(ReportStatus::Ascending(lvl)),
+            1..=3 => Ok(ReportStatus::Descending(lvl)),
+            _ => Err(()),
+        },
+        ReportStatus::Descending(prev) => {
+            if let 1..=3 = prev - lvl {
+                Ok(ReportStatus::Descending(lvl))
+            } else {
+                Err(())
+            }
+        }
+        ReportStatus::Ascending(prev) => {
+            if let 1..=3 = lvl - prev {
+                Ok(ReportStatus::Ascending(lvl))
+            } else {
+                Err(())
+            }
+        }
+    }
 }
 
 #[aoc(day2, part2, AoCS)]
@@ -57,7 +63,7 @@ pub fn part2(input: &str) -> usize {
 
 #[aoc(day2, part2, naive)]
 pub fn part2_naive(input: &str) -> Result<usize> {
-    let reports = parse(input)?;
+    let reports = parse(input);
     let result = reports
         .into_iter()
         .filter(|report| {
@@ -98,13 +104,14 @@ pub fn part2_naive(input: &str) -> Result<usize> {
     Ok(result)
 }
 
-pub fn parse(input: &str) -> Result<Vec<Vec<i64>>> {
-    input
-        .lines()
+pub fn parse(input: &str) -> Vec<Vec<i64>> {
+    let bytes = input.as_bytes();
+    bytes
+        .ascii_lines()
         .map(|report| {
             report
-                .split_ascii_whitespace()
-                .map(|level| level.parse().map_err(Into::into))
+                .ascii_words()
+                .map(|level| u64_from_ascii(level) as i64)
                 .collect()
         })
         .collect()
@@ -126,10 +133,12 @@ mod tests {
     #[test]
     fn test_part1() {
         assert_eq!(part1(DAY2_INPUT), 2);
+        assert_eq!(part1_safe(DAY2_INPUT).unwrap(), 2);
     }
 
     #[test]
     fn test_part2() {
+        assert_eq!(part2(DAY2_INPUT), 4);
         assert_eq!(part2_naive(DAY2_INPUT).unwrap(), 4);
     }
 }

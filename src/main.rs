@@ -4,11 +4,12 @@ use std::io::{BufRead, Read};
 
 fn dispatch(day: u8, part: u8, input: &str) -> Result<String> {
     match (day, part) {
-        (1, 1) => aoc2024::day1::part1_safe(input),
-        (1, 2) => aoc2024::day1::part2_safe(input),
+        (1, 1) => aoc2024::day1::part1_safe(input).map(|res| res.to_string()),
+        (1, 2) => aoc2024::day1::part2_safe(input).map(|res| res.to_string()),
+        (2, 1) => aoc2024::day2::part1_safe(input).map(|res| res.to_string()),
+        (2, 2) => aoc2024::day2::part2_naive(input).map(|res| res.to_string()),
         _ => Err(anyhow!("no solution for day {day} part {part}")),
     }
-    .map(|res| res.to_string())
 }
 
 fn run() -> Result<()> {
