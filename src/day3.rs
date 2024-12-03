@@ -4,12 +4,122 @@ use aoc_runner_derive::aoc;
 
 #[aoc(day3, part1, AoCS)]
 pub fn part1(input: &str) -> u64 {
-    part1_safe(input).unwrap()
+    let mut input = input.as_bytes();
+    let mut res = 0;
+    loop {
+        let Some(pos) = input.iter().position(|&c| c == b'm') else {
+            break;
+        };
+        let (offset, v) = parse_ascii_mul(&input[pos..]);
+        v.map(|v| res += v);
+        input = &input[offset + pos..];
+    }
+    res
+}
+
+const ZERO: u8 = b'0';
+
+fn parse_ascii_mul(expr: &[u8]) -> (usize, Option<u64>) {
+    if expr.starts_with(b"mul(") {
+        parse_mul_args(expr)
+    } else {
+        (1, None)
+    }
+}
+
+/// Parse mul function arguments with explicit pattern matching for every possible case
+#[inline(always)]
+fn parse_mul_args(args: &[u8]) -> (usize, Option<u64>) {
+    match args[4..] {
+        [l1, b',', r1, b')', ..] => (8, Some((l1 - ZERO) as u64 * (r1 - ZERO) as u64)),
+        [l1, b',', r1, r2, b')', ..] => (
+            9,
+            Some((l1 - ZERO) as u64 * ((r1 - ZERO) as u64 * 10 + (r2 - ZERO) as u64)),
+        ),
+        [l1, b',', r1, r2, r3, b')', ..] => (
+            10,
+            Some(
+                (l1 - ZERO) as u64
+                    * ((r1 - ZERO) as u64 * 100 + (r2 - ZERO) as u64 * 10 + (r3 - ZERO) as u64),
+            ),
+        ),
+        [l1, l2, b',', r1, b')', ..] => (
+            9,
+            Some(((l1 - ZERO) as u64 * 10 + (l2 - ZERO) as u64) * (r1 - ZERO) as u64),
+        ),
+        [l1, l2, b',', r1, r2, b')', ..] => (
+            10,
+            Some(
+                ((l1 - ZERO) as u64 * 10 + (l2 - ZERO) as u64)
+                    * ((r1 - ZERO) as u64 * 10 + (r2 - ZERO) as u64),
+            ),
+        ),
+        [l1, l2, b',', r1, r2, r3, b')', ..] => (
+            11,
+            Some(
+                ((l1 - ZERO) as u64 * 10 + (l2 - ZERO) as u64)
+                    * ((r1 - ZERO) as u64 * 100 + (r2 - ZERO) as u64 * 10 + (r3 - ZERO) as u64),
+            ),
+        ),
+        [l1, l2, l3, b',', r1, b')', ..] => (
+            10,
+            Some(
+                ((l1 - ZERO) as u64 * 100 + (l2 - ZERO) as u64 * 10 + (l3 - ZERO) as u64)
+                    * (r1 - ZERO) as u64,
+            ),
+        ),
+        [l1, l2, l3, b',', r1, r2, b')', ..] => (
+            11,
+            Some(
+                ((l1 - ZERO) as u64 * 100 + (l2 - ZERO) as u64 * 10 + (l3 - ZERO) as u64)
+                    * ((r1 - ZERO) as u64 * 10 + (r2 - ZERO) as u64),
+            ),
+        ),
+        [l1, l2, l3, b',', r1, r2, r3, b')', ..] => (
+            12,
+            Some(
+                ((l1 - ZERO) as u64 * 100 + (l2 - ZERO) as u64 * 10 + (l3 - ZERO) as u64)
+                    * ((r1 - ZERO) as u64 * 100 + (r2 - ZERO) as u64 * 10 + (r3 - ZERO) as u64),
+            ),
+        ),
+        _ => (4, None),
+    }
 }
 
 #[aoc(day3, part2, AoCS)]
 pub fn part2(input: &str) -> u64 {
-    part2_safe(input).unwrap()
+    let mut input = input;
+    let mut res = 0;
+    let mut enabled = true;
+    loop {
+        if enabled {
+            let Some(pos) = input.bytes().position(|c| c == b'm' || c == b'd') else {
+                break;
+            };
+            let (offset, enable, v) = parse_enabled(&input.as_bytes()[pos..]);
+            enabled = enable;
+            v.map(|v| res += v);
+            input = &input[offset + pos..];
+        } else {
+            let Some(pos) = input.find("do()") else {
+                break;
+            };
+            enabled = true;
+            input = &input[pos + 4..];
+        }
+    }
+    res
+}
+
+fn parse_enabled(expr: &[u8]) -> (usize, bool, Option<u64>) {
+    if expr.starts_with(b"mul(") {
+        let (offset, v) = parse_mul_args(expr);
+        (offset, true, v)
+    } else if expr.starts_with(b"don't()") {
+        (7, false, None)
+    } else {
+        (1, true, None)
+    }
 }
 
 #[aoc(day3, part1, default)]
@@ -17,13 +127,13 @@ pub fn part1_safe(input: &str) -> Result<u64> {
     let mut input = input;
     let mut res = 0;
     while input.len() >= 8 {
-        parse_expr(&input).map(|v| res += v);
+        parse_mul(&input).map(|v| res += v);
         input = &input[1..]
     }
     Ok(res)
 }
 
-pub fn parse_expr(expr: &str) -> Option<u64> {
+pub fn parse_mul(expr: &str) -> Option<u64> {
     if expr.starts_with("mul(") {
         let args = &expr[4..12];
         let sep = args.find(',')?;
