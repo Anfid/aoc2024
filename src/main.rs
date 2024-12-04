@@ -10,6 +10,8 @@ fn dispatch(day: u8, part: u8, input: &str) -> Result<String> {
         (2, 2) => Ok(aoc2024::day2::part2(input)).map(|res| res.to_string()),
         (3, 1) => aoc2024::day3::part1_safe(input).map(|res| res.to_string()),
         (3, 2) => aoc2024::day3::part2_safe(input).map(|res| res.to_string()),
+        (4, 1) => Ok(aoc2024::day4::part1(input)).map(|res| res.to_string()),
+        (4, 2) => Ok(aoc2024::day4::part2(input)).map(|res| res.to_string()),
         _ => Err(anyhow!("no solution for day {day} part {part}")),
     }
 }
