@@ -5,12 +5,43 @@ use std::cmp::Ordering;
 
 #[aoc(day1, part1, AoCS)]
 pub fn part1(input: &str) -> u64 {
-    part1_safe(input).unwrap()
+    let input = input.as_bytes();
+    let (mut left, mut right) = parse_optimistic(input);
+    left.sort_unstable();
+    right.sort_unstable();
+    let result = std::iter::zip(left, right)
+        .map(|(l, r)| l.abs_diff(r))
+        .sum();
+    result
 }
 
 #[aoc(day1, part2, AoCS)]
 pub fn part2(input: &str) -> u64 {
-    part2_safe(input).unwrap()
+    let input = input.as_bytes();
+    let parsed = parse_optimistic(input);
+    solve_p2(parsed)
+}
+
+pub fn parse_optimistic(input: &[u8]) -> (Vec<u64>, Vec<u64>) {
+    const WIDTH: usize = 14;
+    const HEIGHT: usize = 1000;
+    let mut left = Vec::with_capacity(HEIGHT);
+    let mut right = Vec::with_capacity(HEIGHT);
+
+    for i in 0..HEIGHT {
+        let [l1, l2, l3, l4, l5, b' ', b' ', b' ', r1, r2, r3, r4, r5] =
+            input[i * WIDTH..i * WIDTH + WIDTH - 1]
+        else {
+            unreachable!()
+        };
+        let l = l1 as u64 * 10000 + l2 as u64 * 1000 + l3 as u64 * 100 + l4 as u64 * 10 + l5 as u64
+            - (b'0' as u64 * 11111);
+        let r = r1 as u64 * 10000 + r2 as u64 * 1000 + r3 as u64 * 100 + r4 as u64 * 10 + r5 as u64
+            - (b'0' as u64 * 11111);
+        left.push(l);
+        right.push(r);
+    }
+    (left, right)
 }
 
 #[aoc(day1, part1, default)]
@@ -26,7 +57,11 @@ pub fn part1_safe(input: &str) -> Result<u64> {
 
 #[aoc(day1, part2, default)]
 pub fn part2_safe(input: &str) -> Result<u64> {
-    let (mut left, mut right) = parse(input)?;
+    let parsed = parse(input)?;
+    Ok(solve_p2(parsed))
+}
+
+pub fn solve_p2((mut left, mut right): (Vec<u64>, Vec<u64>)) -> u64 {
     left.sort_unstable();
     right.sort_unstable();
 
@@ -59,7 +94,7 @@ pub fn part2_safe(input: &str) -> Result<u64> {
             }
         }
     }
-    Ok(similarity_score)
+    similarity_score
 }
 
 pub fn parse(input: &str) -> Result<(Vec<u64>, Vec<u64>)> {
