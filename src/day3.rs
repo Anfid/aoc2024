@@ -17,7 +17,7 @@ pub fn part1(input: &str) -> u64 {
     res
 }
 
-const ZERO: u8 = b'0';
+const ZERO: u64 = b'0' as u64;
 
 fn parse_ascii_mul(expr: &[u8]) -> (usize, Option<u64>) {
     if expr.starts_with(b"mul(") {
@@ -31,55 +31,50 @@ fn parse_ascii_mul(expr: &[u8]) -> (usize, Option<u64>) {
 #[inline(always)]
 fn parse_mul_args(args: &[u8]) -> (usize, Option<u64>) {
     match args[4..] {
-        [l1, b',', r1, b')', ..] => (8, Some((l1 - ZERO) as u64 * (r1 - ZERO) as u64)),
+        [l1, b',', r1, b')', ..] => (8, Some((l1 as u64 * r1 as u64) - ZERO * ZERO)),
         [l1, b',', r1, r2, b')', ..] => (
             9,
-            Some((l1 - ZERO) as u64 * ((r1 - ZERO) as u64 * 10 + (r2 - ZERO) as u64)),
+            Some((l1 as u64 * (r1 as u64 * 10 + r2 as u64)) - ZERO * 11 * ZERO),
         ),
         [l1, b',', r1, r2, r3, b')', ..] => (
             10,
-            Some(
-                (l1 - ZERO) as u64
-                    * ((r1 - ZERO) as u64 * 100 + (r2 - ZERO) as u64 * 10 + (r3 - ZERO) as u64),
-            ),
+            Some((l1 as u64 * (r1 as u64 * 100 + r2 as u64 * 10 + r3 as u64)) - ZERO * 111 * ZERO),
         ),
         [l1, l2, b',', r1, b')', ..] => (
             9,
-            Some(((l1 - ZERO) as u64 * 10 + (l2 - ZERO) as u64) * (r1 - ZERO) as u64),
+            Some(((l1 as u64 * 10 + l2 as u64) * r1 as u64) - 11 * ZERO * ZERO),
         ),
         [l1, l2, b',', r1, r2, b')', ..] => (
             10,
             Some(
-                ((l1 - ZERO) as u64 * 10 + (l2 - ZERO) as u64)
-                    * ((r1 - ZERO) as u64 * 10 + (r2 - ZERO) as u64),
+                ((l1 as u64 * 10 + l2 as u64) * (r1 as u64 * 10 + r2 as u64))
+                    - 11 * ZERO * 11 * ZERO,
             ),
         ),
         [l1, l2, b',', r1, r2, r3, b')', ..] => (
             11,
             Some(
-                ((l1 - ZERO) as u64 * 10 + (l2 - ZERO) as u64)
-                    * ((r1 - ZERO) as u64 * 100 + (r2 - ZERO) as u64 * 10 + (r3 - ZERO) as u64),
+                ((l1 as u64 * 10 + l2 as u64) * (r1 as u64 * 100 + r2 as u64 * 10 + r3 as u64))
+                    - 11 * ZERO * 111 * ZERO,
             ),
         ),
         [l1, l2, l3, b',', r1, b')', ..] => (
             10,
-            Some(
-                ((l1 - ZERO) as u64 * 100 + (l2 - ZERO) as u64 * 10 + (l3 - ZERO) as u64)
-                    * (r1 - ZERO) as u64,
-            ),
+            Some(((l1 as u64 * 100 + l2 as u64 * 10 + l3 as u64) * r1 as u64) - 111 * ZERO * ZERO),
         ),
         [l1, l2, l3, b',', r1, r2, b')', ..] => (
             11,
             Some(
-                ((l1 - ZERO) as u64 * 100 + (l2 - ZERO) as u64 * 10 + (l3 - ZERO) as u64)
-                    * ((r1 - ZERO) as u64 * 10 + (r2 - ZERO) as u64),
+                ((l1 as u64 * 100 + l2 as u64 * 10 + l3 as u64) * (r1 as u64 * 10 + r2 as u64))
+                    - 111 * ZERO * 11 * ZERO,
             ),
         ),
         [l1, l2, l3, b',', r1, r2, r3, b')', ..] => (
             12,
             Some(
-                ((l1 - ZERO) as u64 * 100 + (l2 - ZERO) as u64 * 10 + (l3 - ZERO) as u64)
-                    * ((r1 - ZERO) as u64 * 100 + (r2 - ZERO) as u64 * 10 + (r3 - ZERO) as u64),
+                ((l1 as u64 * 100 + l2 as u64 * 10 + l3 as u64)
+                    * (r1 as u64 * 100 + r2 as u64 * 10 + r3 as u64))
+                    - 111 * ZERO * 111 * ZERO,
             ),
         ),
         _ => (4, None),
