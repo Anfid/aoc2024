@@ -28,10 +28,8 @@ pub fn part1(input: &str) -> u32 {
         let mut correct = true;
         for (idx, n) in buf.iter().enumerate() {
             for (left, right) in &ordering {
-                if n == right {
-                    if buf[idx..].iter().any(|v| v == left) {
-                        correct = false;
-                    }
+                if n == right && buf[idx..].iter().any(|v| v == left) {
+                    correct = false;
                 }
             }
         }
@@ -39,10 +37,13 @@ pub fn part1(input: &str) -> u32 {
             res += buf[buf.len() / 2];
         }
 
-        if let Some(next) = &input.get(i + 3..) {
-            input = next
-        } else {
-            break;
+        match &input.get(i + 3..) {
+            Some(next) if !next.is_empty() => {
+                input = next;
+            }
+            _ => {
+                break;
+            }
         }
     }
 
@@ -75,12 +76,7 @@ mod tests {
     const DAY5_INPUT: &'static str = include_str!("../input/2024/day5.txt");
 
     #[test]
-    fn part1_example() {
-        assert_eq!(part1(DAY5_INPUT), 0);
-    }
-
-    #[test]
-    fn part2_example() {
-        assert_eq!(part2(DAY5_INPUT), 0);
+    fn part1_input() {
+        assert_eq!(part1(DAY5_INPUT), 5955);
     }
 }

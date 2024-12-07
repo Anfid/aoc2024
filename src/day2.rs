@@ -150,7 +150,8 @@ pub fn parse(input: &str) -> Vec<Vec<i32>> {
 mod tests {
     use super::*;
 
-    const DAY2_INPUT: &'static str = "\
+    const DAY2_INPUT: &'static str = include_str!("../input/2024/day2.txt");
+    const DAY2_EXAMPLE: &'static str = "\
 7 6 4 2 1
 1 2 7 8 9
 9 7 6 2 1
@@ -160,12 +161,17 @@ mod tests {
 ";
 
     #[test]
-    fn test_part1() {
-        assert_eq!(part1(DAY2_INPUT), 2);
+    fn part1_example() {
+        assert_eq!(part1(DAY2_EXAMPLE), 2);
     }
 
     #[test]
-    fn test_part2() {
-        assert_eq!(part2(DAY2_INPUT), 4);
+    fn part1_input() {
+        assert_eq!(part1(DAY2_INPUT), 299);
+    }
+
+    #[test]
+    fn part2_input() {
+        assert_eq!(part2(DAY2_INPUT), 364);
     }
 }

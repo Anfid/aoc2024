@@ -26,14 +26,6 @@ macro_rules! num_from_digits {
 }
 pub(crate) use num_from_digits;
 
-const fn ones(count: usize) -> u32 {
-    if count == 1 {
-        1
-    } else {
-        10 * ones(count - 1) + 1
-    }
-}
-
 pub trait BytesAsciiExt {
     fn ascii_lines(&self) -> impl Iterator<Item = &[u8]>;
 

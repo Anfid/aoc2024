@@ -18,7 +18,7 @@ pub fn part1_safe(input: &str) -> Result<u64> {
             .split_ascii_whitespace()
             .map(|s| s.parse())
             .collect::<Result<Vec<u64>, _>>()?;
-        for i in 0..1 << values.len() - 1 {
+        for i in 0..1 << (values.len() - 1) {
             let op_res =
                 values[1..]
                     .iter()

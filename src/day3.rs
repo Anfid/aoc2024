@@ -1,4 +1,4 @@
-use crate::parsers::u64_from_ascii;
+use crate::parsers::{num_from_digits, u64_from_ascii};
 use anyhow::Result;
 use aoc_runner_derive::aoc;
 
@@ -11,13 +11,13 @@ pub fn part1(input: &str) -> u64 {
             break;
         };
         let (offset, v) = parse_ascii_mul(&input[pos..]);
-        v.map(|v| res += v);
+        if let Some(v) = v {
+            res += v;
+        }
         input = &input[offset + pos..];
     }
     res
 }
-
-const ZERO: u64 = b'0' as u64;
 
 fn parse_ascii_mul(expr: &[u8]) -> (usize, Option<u64>) {
     if expr.starts_with(b"mul(") {
@@ -31,51 +31,41 @@ fn parse_ascii_mul(expr: &[u8]) -> (usize, Option<u64>) {
 #[inline(always)]
 fn parse_mul_args(args: &[u8]) -> (usize, Option<u64>) {
     match args[4..] {
-        [l1, b',', r1, b')', ..] => (8, Some((l1 as u64 * r1 as u64) - ZERO * ZERO)),
+        [l1, b',', r1, b')', ..] => (
+            8,
+            Some(num_from_digits!(u64, l1) * num_from_digits!(u64, r1)),
+        ),
         [l1, b',', r1, r2, b')', ..] => (
             9,
-            Some((l1 as u64 * (r1 as u64 * 10 + r2 as u64)) - ZERO * 11 * ZERO),
+            Some(num_from_digits!(u64, l1) * num_from_digits!(u64, r1, r2)),
         ),
         [l1, b',', r1, r2, r3, b')', ..] => (
             10,
-            Some((l1 as u64 * (r1 as u64 * 100 + r2 as u64 * 10 + r3 as u64)) - ZERO * 111 * ZERO),
+            Some(num_from_digits!(u64, l1) * num_from_digits!(u64, r1, r2, r3)),
         ),
         [l1, l2, b',', r1, b')', ..] => (
             9,
-            Some(((l1 as u64 * 10 + l2 as u64) * r1 as u64) - 11 * ZERO * ZERO),
+            Some(num_from_digits!(u64, l1, l2) * num_from_digits!(u64, r1)),
         ),
         [l1, l2, b',', r1, r2, b')', ..] => (
             10,
-            Some(
-                ((l1 as u64 * 10 + l2 as u64) * (r1 as u64 * 10 + r2 as u64))
-                    - 11 * ZERO * 11 * ZERO,
-            ),
+            Some(num_from_digits!(u64, l1, l2) * num_from_digits!(u64, r1, r2)),
         ),
         [l1, l2, b',', r1, r2, r3, b')', ..] => (
             11,
-            Some(
-                ((l1 as u64 * 10 + l2 as u64) * (r1 as u64 * 100 + r2 as u64 * 10 + r3 as u64))
-                    - 11 * ZERO * 111 * ZERO,
-            ),
+            Some(num_from_digits!(u64, l1, l2) * num_from_digits!(u64, r1, r2, r3)),
         ),
         [l1, l2, l3, b',', r1, b')', ..] => (
             10,
-            Some(((l1 as u64 * 100 + l2 as u64 * 10 + l3 as u64) * r1 as u64) - 111 * ZERO * ZERO),
+            Some(num_from_digits!(u64, l1, l2, l3) * num_from_digits!(u64, r1)),
         ),
         [l1, l2, l3, b',', r1, r2, b')', ..] => (
             11,
-            Some(
-                ((l1 as u64 * 100 + l2 as u64 * 10 + l3 as u64) * (r1 as u64 * 10 + r2 as u64))
-                    - 111 * ZERO * 11 * ZERO,
-            ),
+            Some(num_from_digits!(u64, l1, l2, l3) * num_from_digits!(u64, r1, r2)),
         ),
         [l1, l2, l3, b',', r1, r2, r3, b')', ..] => (
             12,
-            Some(
-                ((l1 as u64 * 100 + l2 as u64 * 10 + l3 as u64)
-                    * (r1 as u64 * 100 + r2 as u64 * 10 + r3 as u64))
-                    - 111 * ZERO * 111 * ZERO,
-            ),
+            Some(num_from_digits!(u64, l1, l2, l3) * num_from_digits!(u64, r1, r2, r3)),
         ),
         _ => (4, None),
     }
@@ -93,7 +83,9 @@ pub fn part2(input: &str) -> u64 {
             };
             let (offset, enable, v) = parse_enabled(&input.as_bytes()[pos..]);
             enabled = enable;
-            v.map(|v| res += v);
+            if let Some(v) = v {
+                res += v;
+            }
             input = &input[offset + pos..];
         } else {
             let Some(pos) = input.find("do()") else {
@@ -122,7 +114,9 @@ pub fn part1_safe(input: &str) -> Result<u64> {
     let mut input = input;
     let mut res = 0;
     while input.len() >= 8 {
-        parse_mul(&input).map(|v| res += v);
+        if let Some(v) = parse_mul(input) {
+            res += v;
+        }
         input = &input[1..]
     }
     Ok(res)
@@ -150,7 +144,7 @@ pub fn part2_safe(input: &str) -> Result<u64> {
     let mut res = 0;
     let mut enabled = true;
     while input.len() >= 8 {
-        match parse_fn(&input) {
+        match parse_fn(input) {
             Some(Expr::Stop) => {
                 enabled = false;
             }
@@ -201,13 +195,13 @@ mod tests {
     const DAY3_INPUT: &'static str = include_str!("../input/2024/day3.txt");
 
     #[test]
-    fn test_part1() {
+    fn part1_input() {
         assert_eq!(part1(DAY3_INPUT), 163931492);
         assert_eq!(part1_safe(DAY3_INPUT).unwrap(), 163931492);
     }
 
     #[test]
-    fn test_part2() {
+    fn part2_input() {
         assert_eq!(part2(DAY3_INPUT), 76911921);
         assert_eq!(part2_safe(DAY3_INPUT).unwrap(), 76911921);
     }
